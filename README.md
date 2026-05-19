@@ -16,7 +16,7 @@ A compact repository dedicated to reading, parsing, and filtering data files usi
 
 ## 🚀 Key Code Snippets
 
-### 1. Grouping & Filtering Challenges
+### Grouping & Filtering Challenges
 Conquering complex aggregations by grouping data and isolating maximum values via index maximization:
 ```python
 # Group by researcher and sum metrics
