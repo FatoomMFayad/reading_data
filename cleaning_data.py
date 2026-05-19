@@ -20,8 +20,22 @@ df1 = pd.json_normalize(json_data)
 df1 = df1.dropna()
 #drop duplicates
 df1 = df1.drop_duplicates()
-max_citations = df1['citations'].agg(['max'])
-print(max_citations)
+#get the id of the most cited paper
+max_citations_idx = df1['citations'].idxmax()
+#get the title of the most cited paper
+highest_citations_title = df1.loc[max_citations_idx, 'title']
+#get the author id of the most cited paper
+highest_citations_author_id = df1.loc[max_citations_idx, 'researcher_id']
+#get the author row of the most cited paper
+author_row = df[df['researcher_id'] == highest_citations_author_id]
+#get the author first name of the most cited paper
+author_first_name =author_row['first_name'].values[0]
+#get the author last name of the most cited paper
+author_last_name = author_row['last_name'].values[0]
+# concat the author first name and last name
+author_name = f"{author_first_name} {author_last_name}"
+#print the title and the author of the most cited paper
+print(f"The most cited paper is {highest_citations_title} written by {author_name}")
 
 
 
