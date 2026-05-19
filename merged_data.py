@@ -44,7 +44,17 @@ how='inner'
     on='researcher_id',
     how='inner' 
 )
-print(merged_researchers_pub.head)
+highest_citations_sum = merged_researchers_pub.groupby('researcher_id')['citations'].sum()
+highest_citations_author_id = highest_citations_sum.idxmax()
+#get the author row of the most cited paper
+author_row = merged_researchers_pub[merged_researchers_pub['researcher_id'] == highest_citations_author_id]
+#get the author first name of the most cited paper
+author_first_name =author_row['first_name'].values[0]
+#get the author last name of the most cited paper
+author_last_name = author_row['last_name'].values[0]
+# concat the author first name and last name
+author_name = f"{author_first_name} {author_last_name}"
+print(author_name)
 
 
 
