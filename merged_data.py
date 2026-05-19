@@ -59,8 +59,13 @@ print(author_name)
 highest_total_funding = merged_researchers_pub.groupby('field')['amount_cad'].sum()
 highest_total_funding_id = highest_total_funding.idxmax()
 print(highest_total_funding_id)
+#joined first and still active
+first_active_joined = merged_researchers_pub[(merged_researchers_pub['is_active']== True)].sort_values('joined_year', ascending=True)
+full_name = f"{first_active_joined.iloc[0]['first_name']} {first_active_joined.iloc[0]['last_name']}"
+join_year = first_active_joined.iloc[0]['joined_year']
+print(f"{full_name} joined {join_year}")
 
-
+merged_researchers_pub.to_csv('data/my_merged_files.csv', index=False)
 
 
 
