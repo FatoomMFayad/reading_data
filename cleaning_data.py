@@ -37,5 +37,19 @@ author_name = f"{author_first_name} {author_last_name}"
 #print the title and the author of the most cited paper
 print(f"The most cited paper is {highest_citations_title} written by {author_name}")
 
+#load the excel file
+funding_df = pd.read_excel('data/funding.xlsx')
+#change strings into zeros
+funding_df['amount_cad'] = pd.to_numeric(
+    funding_df['amount_cad'].astype(str).str.replace('N/A','', regex=False), 
+    errors='coerce'
+).fillna(0)
+#drop rows with null values
+funding_df = funding_df.dropna(subset=['amount_cad'])
+#take only positive amounts
+funding_df = funding_df[funding_df['amount_cad'] > 0]
+#Sum funding by grant_id
+sum_funding = funding_df['amount_cad'].sum()
+print(sum_funding)
 
 
