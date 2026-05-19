@@ -55,6 +55,10 @@ author_last_name = author_row['last_name'].values[0]
 # concat the author first name and last name
 author_name = f"{author_first_name} {author_last_name}"
 print(author_name)
+#field received the most total funding
+highest_total_funding = merged_researchers_pub.groupby('field')['amount_cad'].sum()
+highest_total_funding_id = highest_total_funding.idxmax()
+print(highest_total_funding_id)
 
 
 
