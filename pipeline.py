@@ -18,5 +18,22 @@ def load_data(url: str, local_path: str)-> pd.DataFrame:
 chess_df = load_data(chess_url, 'data/raw/chess_games.csv')
 players_df = load_data(players_registry_url, 'data/raw/players_registry.csv')
 
+#drop rows with null values 
+# chess_df = chess_df.dropna()
+#drop duplicates
+# players_df = players_df.drop_duplicates()
+
+print(f'Number of records is : {len(chess_df)}')
+print(f'Number of duplicated records is : {chess_df.duplicated().sum()}')
+print(f"Number of games having duplicate moves sequences is : {chess_df.duplicated(subset=['moves']).sum()}")
+print(f"% of missing opening : {chess_df['opening_response'].isnull().mean() * 100}")
+print(chess_df['opening_variation'].isnull().mean() * 100)
+print(chess_df['turns'].min())
+
+
+
+
+
+
 
 
