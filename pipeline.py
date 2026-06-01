@@ -15,13 +15,9 @@ def load_data(url: str, local_path: str)-> pd.DataFrame:
     print(f'Saved to {local_path}')
     return df
 
+# Stage 1 loading and exploring data
 chess_df = load_data(chess_url, 'data/raw/chess_games.csv')
 players_df = load_data(players_registry_url, 'data/raw/players_registry.csv')
-
-#drop rows with null values 
-# chess_df = chess_df.dropna()
-#drop duplicates
-# players_df = players_df.drop_duplicates()
 
 print(f'Number of records is : {len(chess_df)}')
 print(f'Number of duplicated records is : {chess_df.duplicated().sum()}')
@@ -29,6 +25,27 @@ print(f"Number of games having duplicate moves sequences is : {chess_df.duplicat
 print(f"% of missing opening : {chess_df['opening_response'].isnull().mean() * 100}")
 print(chess_df['opening_variation'].isnull().mean() * 100)
 print(chess_df['turns'].min())
+
+# stage 2 build clean_chess
+
+#parse time_increment
+chess_df[['time_base', 'time_inc']] = chess_df['time_increment'].str.split('+', expand=True).astype(int)
+
+#Add rating_diff
+chess_df['rating_diff'] = chess_df['white_rating'] - chess_df['black_rating']
+
+#Extract opening_family
+chess_df['opening_family'] = chess_df['opening_fullname'].str.split(':').str[0].str.strip()
+
+#Drop high-null cloumn
+chess_df = chess_df.drop(columns=['opening_response'])
+
+#Flag short games
+chess_df['is_suspicious'] = chess_df['turns'] < 5
+
+#validate
+assert chess_df['rating_diff'].notna().all()
+assert chess_df.duplicated().sum() == 0
 
 
 
