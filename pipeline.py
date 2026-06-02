@@ -51,46 +51,60 @@ assert chess_df.duplicated().sum() == 0
 #win rate for White, Black, and Draw 
 win_rates = chess_df['winner'].value_counts(normalize=True) * 100
 print(win_rates)
+#validate
+assert win_rates.sum() == 100
 
 # .idxmax() extracts the index name with the highest frequency
-most_common_end = chess_df['victory_status'].value_counts().idxmax()
-print(f"Most common way games end: {most_common_end}")
+victory_proportions = chess_df['victory_status'].value_counts(normalize=True)
+most_common_end = victory_proportions.idxmax()
+most_common_pct = victory_proportions.max() * 100
+print(f"Most common way games end: {most_common_end} ({most_common_pct:.1f}%)")
 
 # Group by victory_status, calculate mean turns, and find the maximum
 avg_turns_by_status = chess_df.groupby('victory_status')['turns'].mean()
 highest_avg_status = avg_turns_by_status.idxmax()
 
 print(avg_turns_by_status)
-print(f"\nHighest average turns: {highest_avg_status}")
+print(f"\nHighest average turns: {highest_avg_status}, {avg_turns_by_status['Draw']:.1f}%")
 
 # Filter for Black wins, get the most common opening family
+
 black_wins = chess_df[chess_df['winner'] == 'Black']
-top_opening_black = black_wins['opening_family'].value_counts().idxmax()
+black_opening_counts = black_wins['opening_family'].value_counts()
+
+# Get the name and the count
+top_opening_black = black_opening_counts.idxmax()
+top_opening_black_count = black_opening_counts.max()
 
 # Filter for White wins, get the most common opening family
 white_wins = chess_df[chess_df['winner'] == 'White']
-top_opening_white = white_wins['opening_family'].value_counts().idxmax()
+white_opening_counts = white_wins['opening_family'].value_counts()
+top_opening_white = white_opening_counts.idxmax()
+top_opening_white_count = white_opening_counts.max()
 
-print(f"Most popular opening when Black wins: {top_opening_black}")
-print(f"Most popular opening when White wins: {top_opening_white}")
+print(f"Most popular opening when Black wins: {top_opening_black}, {top_opening_black_count}")
+print(f"Most popular opening when White wins: {top_opening_white}, {top_opening_white_count}")
 
 # Group by 'rated' (True/False) and calculate the percentage of White wins
 # We look for where winner == 'white'
-white_win_rate_by_rating = chess_df.groupby('rated').apply(lambda g: (g['winner'] == 'White').mean() * 100)
+white_win_rate_by_rating = (chess_df['winner'] == 'White').groupby(chess_df['rated']).mean() * 100
+white_win_rate_by_rating = white_win_rate_by_rating.round(2)
 print(white_win_rate_by_rating)
 
 # 1. Define the classification function (adjust threshold boundaries if needed)
-def classify_game_length(turns):
-    if turns < 20:
-        return 'Short'
-    elif turns <= 60:
-        return 'Medium'
-    else:
-        return 'Long'
+chess_df['game_length'] = pd.cut(
+    chess_df['turns'],
+    bins=[0, 15, 70, 150], 
+    labels=['Short', 'Medium', 'Long']
+)
+
+# Calculate the percentages for these specific buckets
+length_percentages = chess_df['game_length'].value_counts(normalize=True) * 100
+print(length_percentages.round(2))
 
 # 2. Apply the function to create a new column
-chess_df['game_length_category'] = chess_df['turns'].apply(classify_game_length)
-
+# chess_df['game_length_category'] = chess_df['turns'].apply(classify_game_length)
+# 
 # 3. Calculate percentages
-length_percentages = chess_df['game_length_category'].value_counts(normalize=True) * 100
-print(length_percentages)
+# length_percentages = chess_df['game_length_category'].value_counts(normalize=True) * 100
+# print(length_percentages)
