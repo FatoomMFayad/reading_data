@@ -102,9 +102,50 @@ chess_df['game_length'] = pd.cut(
 length_percentages = chess_df['game_length'].value_counts(normalize=True) * 100
 print(length_percentages.round(2))
 
-# 2. Apply the function to create a new column
-# chess_df['game_length_category'] = chess_df['turns'].apply(classify_game_length)
-# 
-# 3. Calculate percentages
-# length_percentages = chess_df['game_length_category'].value_counts(normalize=True) * 100
-# print(length_percentages)
+#stage 4
+#merge white player data with registry
+merged = pd.merge(
+    chess_df[['game_id', 'white_id', 'white_rating', 'winner']],
+    players_df.rename(columns={'username': 'white_id'}),
+    on='white_id', how='left')
+#white players that have no registry entry
+unique_missing_players = chess_df.loc[~chess_df['white_id'].isin(players_df['username']), 'white_id'].nunique()
+print(f"Unique missing players: {unique_missing_players}")
+
+#Standardize inconsistent country names
+country_map = {'RUS': 'Russia', 'russian federation': 'Russia',
+               'US': 'United States', 'USA':'United States', 'united states' : 'United States',
+               'UA':'Ukraine', 'GB':'United Kingdom', 'united kingdom':'United Kingdom', 'UK' :'United Kingdom',
+               'Deutschland':'Germany','DE':'Germany', 'ES':'Spain',
+               'FR': 'France', 'france':'France', 'IN':'India', 'india':'India',
+               'PL':'Poland', 'poland':'Poland','BRA':'Brazil', 'brazil':'Brazil'}
+
+merged['country'] = merged['country'].map(country_map).fillna(merged['country'])
+
+unique_country_strings = merged['country'].nunique()
+print(f"Total unique country strings: {unique_country_strings}")
+
+#Plot: bar chart of win counts by color. Save to output/wins_by_color.png
+# Create the plot using pandas and assign it to 'ax'
+ax = merged['winner'].value_counts().plot(
+    kind='bar', 
+    title='Wins by Color',
+    color=['#C9A84C', '#1B3A2D', '#7A8C7E'],
+    rot=0
+)
+
+# Add the value labels on top of the containers (the bars)
+ax.bar_label(ax.containers[0], padding=3)
+
+# Save the figure to PNG
+ax.get_figure().savefig('plots/wins_by_color.png', bbox_inches='tight', dpi=300)
+
+#Plot: scatter of white_rating vs turns for rated games
+scatter_ax = chess_df.plot(
+    kind='scatter', 
+    x ='white_rating', y ='turns',
+    alpha=0.3, title='Rating vs Game Length',
+    color="#11B6E8")  
+   
+# Save the figure to PNG
+scatter_ax.get_figure().savefig('plots/rating_vs_game_length.png', bbox_inches='tight', dpi=300)
